@@ -1,5 +1,5 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyCfvQxsNKceB8m-kzSCzmyx9XoE4rtSzis",
+  apiKey: "OPENAI_API_KEY",
   authDomain: "stressprediction-21e62.firebaseapp.com",
   projectId: "stressprediction-21e62",
   storageBucket: "stressprediction-21e62.firebasestorage.app",
