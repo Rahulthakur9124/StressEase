@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stress Form | StressEase</title>
+  <link rel="stylesheet" href="stress-form.css" />
+</head>
+<body>
+  <div class="overlay">
+    <div class="form-wrapper">
+      <h2>🧠 Daily StressEase Level</h2>
+      <form id="stressForm" class="form-container">
+        <label for="anxiety">Anxiety Level (1-5):</label>
+        <input type="number" id="anxiety" name="anxiety" min="1" max="5" required />
+
+        <label for="sleep">Sleep Quality (1-5):</label>
+        <input type="number" id="sleep" name="sleep" min="1" max="5" required />
+
+        <label for="academic">Academic Pressure (1-5):</label>
+        <input type="number" id="academic" name="academic" min="1" max="5" required />
+
+        <label for="career">Career Concerns (1-5):</label>
+        <input type="number" id="career" name="career" min="1" max="5" required />
+
+        <label for="teachers">Relationship with Teachers (1-5):</label>
+        <input type="number" id="teachers" name="teachers" min="1" max="5" required />
+
+        <label for="peer">Peer Pressure (1-5):</label>
+        <input type="number" id="peer" name="peer" min="1" max="5" required />
+
+        <label for="headache">Headaches (1-5):</label>
+        <input type="number" id="headache" name="headache" min="1" max="5" required />
+
+        <label for="bp">Blood Pressure Status (1-5):</label>
+        <input type="number" id="bp" name="bp" min="1" max="5" required />
+
+        <label for="noise">Noise Levels Around You (1-5):</label>
+        <input type="number" id="noise" name="noise" min="1" max="5" required />
+
+        <label for="extra">Participation in Extracurricular Activities (1-5):</label>
+        <input type="number" id="extra" name="extra" min="1" max="5" required />
+
+        <label for="bullying">Bullying Experience (1-5):</label>
+        <input type="number" id="bullying" name="bullying" min="1" max="5" required />
+
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+  document.getElementById("stressForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const payload = {};
+
+    formData.forEach((value, key) => {
+      payload[key] = parseInt(value);
+    });
+
+    try {
+      const res = await fetch("http://localhost:5000/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+
+      // Save result for result.html to display
+      localStorage.setItem("stressResult", JSON.stringify(result));
+
+      window.location.href = "result.html";
+    } catch (err) {
+      alert("Something went wrong: " + err.message);
+    }
+  });
+</script>
+
+</body>
+</html>
