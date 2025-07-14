@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard | StressEase</title>
+  <link rel="stylesheet" href="dashboard.css" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div class="overlay">
+    <div class="container">
+      <div class="top-bar">
+        <h2>👋 Welcome, <span id="username">User</span></h2>
+        <button id="logoutBtn">Logout</button>
+      </div>
+
+      <div class="content">
+        <h3>Your Profile</h3>
+        <p><strong>Email:</strong> <span id="useremail">user@example.com</span></p>
+        <button class="stress-btn" onclick="window.location.href='stress-form.html'">
+          Check Stress Level
+        </button>
+      </div>
+      <h2>See previous Report</h2>
+      <div id="lastReport"></div>
+
+    </div>
+  </div>
+
+  <script src="firebase-config.js"></script>
+  <script>
+    const auth = firebase.auth();
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        document.getElementById('username').textContent = user.displayName || "User";
+        document.getElementById('useremail').textContent = user.email;
+      } else {
+        window.location.href = "login.html"; // redirect if not logged in
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      auth.signOut().then(() => {
+        alert("Logged out successfully!");
+        window.location.href = "login.html";
+      });
+    });
+
+    const report = JSON.parse(localStorage.getItem("stressResult"));
+  const lastReportDiv = document.getElementById("lastReport");
+
+  if (report) {
+    const level = report.stress_level;
+    const scores = report.scores;
+
+    let html = `<h3>Last Stress Report</h3>`;
+    html += `<p><strong>Stress Level:</strong> ${level}</p>`;
+    html += `<ul>`;
+    for (const key in scores) {
+      html += `<li>${key.replace("_", " ")}: ${scores[key]}</li>`;
+    }
+    html += `</ul>`;
+    lastReportDiv.innerHTML = html;
+  } else {
+    lastReportDiv.innerHTML = `<p>No report found. Please take the test.</p>`;
+  }
+  </script>
+</body>
+</html>
