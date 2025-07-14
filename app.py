@@ -1,83 +1,69 @@
-from flask import Flask, request, jsonify,render_template, redirect
-from flask_cors import CORS
+# app.py
+import streamlit as st
+import os
 from openai import OpenAI
 from dotenv import load_dotenv
-import os
+
+# Load environment variables
 load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+base_url = os.getenv("OPENAI_BASE_URL")
 
-# API credentials
-a4f_api_key = os.getenv("OPENAI_API_KEY")
-a4f_base_url = os.getenv("OPENAI_BASE_URL")
+# Initialize OpenAI Client
+client = OpenAI(api_key=api_key, base_url=base_url)
 
-# Initialize client
-client = OpenAI(
-    api_key=a4f_api_key,
-    base_url=a4f_base_url,
-)
+st.title("🧠 StressEase - AI-Based Stress Predictor")
 
-app = Flask(__name__, template_folder='templates')
-CORS(app)
-@app.route('/')
-def home():
-    return render_template("index.html")
+st.write("Please rate the following from 1 (low) to 5 (high):")
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    try:
-        data = request.json
-        print("✅ Form data received:", data)
+# Define stress factor inputs
+factors = {
+    "Anxiety": st.slider("Anxiety", 1, 5),
+    "Sleep Quality": st.slider("Sleep Quality", 1, 5),
+    "Academic Pressure": st.slider("Academic Pressure", 1, 5),
+    "Career Concerns": st.slider("Career Concerns", 1, 5),
+    "Relationship with Teachers": st.slider("Relationship with Teachers", 1, 5),
+    "Peer Pressure": st.slider("Peer Pressure", 1, 5),
+    "Headache": st.slider("Headache", 1, 5),
+    "Blood Pressure": st.slider("Blood Pressure", 1, 5),
+    "Noise at Home": st.slider("Noise at Home", 1, 5),
+    "Bullying": st.slider("Bullying", 1, 5),
+    "Extracurricular Load": st.slider("Extracurricular Load", 1, 5),
+}
 
-        # Validate input
-        if not data or not isinstance(data, dict):
-            return jsonify({"error": "Invalid input format"}), 400
-
-        scores = list(data.values())
-        average = sum(scores) / len(scores)
-
-        # Compute stress level
-        if average <= 2.5:
+if st.button("🧠 Predict Stress & Get Suggestions"):
+    with st.spinner("Analyzing your data..."):
+        # Compute average stress level
+        avg = sum(factors.values()) / len(factors)
+        if avg <= 2.5:
             level = "Low"
-        elif average <= 3.5:
+        elif avg <= 3.5:
             level = "Medium"
         else:
             level = "High"
 
-        # Format prompt
-        formatted_input = "\n".join([f"{k.replace('_', ' ').title()}: {v}/5" for k, v in data.items()])
-        prompt = f"""
-You are a helpful mental wellness assistant.
+        # Prompt for GPT
+        prompt = "A user submitted these stress ratings:\n"
+        for k, v in factors.items():
+            prompt += f"{k}: {v}/5\n"
+        prompt += "\nGive 3 personalized suggestions to reduce stress and improve well-being."
 
-A user has submitted the following stress ratings:
-{formatted_input}
-
-Please give 3 personalized and practical suggestions to help reduce stress and improve emotional well-being. Be specific, empathetic, and concise.
-"""
-
-        # Call A4F model
-        completion = client.chat.completions.create(
+        # Call A4F/OpenAI API
+        response = client.chat.completions.create(
             model="provider-3/gpt-4",
             messages=[
-                { "role": "system", "content": "You are a helpful assistant." },
-                { "role": "user", "content": prompt }
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
             ],
             temperature=0.7,
             max_tokens=300
         )
 
-        # Parse response safely
-        message = completion.choices[0].message.content.strip()
-        suggestions = [s.strip("-•123. ").strip() for s in message.split("\n") if s.strip()]
+        suggestions_raw = response.choices[0].message.content.strip()
+        suggestions = [s.strip("-•123. ").strip() for s in suggestions_raw.split("\n") if s.strip()]
 
-        return jsonify({
-    "stress_level": level,
-    "suggestions": suggestions,
-    "scores": data  
-    })
-
-
-    except Exception as e:
-        print("❌ Error during prediction:", str(e))
-        return jsonify({"error": "Internal server error", "details": str(e)}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        # Output result
+        st.success(f"Your Stress Level: **{level}**")
+        st.subheader("💡 Personalized Suggestions:")
+        for s in suggestions:
+            st.markdown(f"- {s}")
