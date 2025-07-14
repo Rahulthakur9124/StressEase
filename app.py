@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,render_template, redirect
 from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -15,8 +15,11 @@ client = OpenAI(
     base_url=a4f_base_url,
 )
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 CORS(app)
+@app.route('/')
+def home():
+    return render_template("index.html")
 
 @app.route('/predict', methods=['POST'])
 def predict():
