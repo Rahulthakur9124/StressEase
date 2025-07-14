@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stress Report | StressEase</title>
+  <link rel="stylesheet" href="result.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+<body>
+  <div class="overlay">
+    <div class="result-container">
+      <h2>Your Stress Level Report</h2>
+
+      <div id="stressLevelBox" class="level-box">
+        <p><strong>Stress Level:</strong> <span id="stressLevelText">Loading...</span></p>
+      </div>
+
+      <div class="suggestions">
+        <h3>Personalized Suggestions 💡</h3>
+        <ul id="suggestionList">
+          <!-- Suggestions will be added here -->
+        </ul>
+      </div>
+      <div class="chart-container">
+        <h3>Your Stress Factor Breakdown 📊</h3>
+        <canvas id="stressChart" width="300" height="300"></canvas>
+      </div>
+
+
+      <button onclick="window.location.href='dashboard.html'">⬅ Back to Dashboard</button>
+    </div>
+  </div>
+
+  <script>
+    // Retrieve result from localStorage
+    const result = JSON.parse(localStorage.getItem("stressResult"));
+
+    if (!result) {
+      alert("No result found. Please submit the stress form first.");
+      window.location.href = "stress-form.html";
+    } else {
+      const level = result.stress_level;
+      const suggestions = result.suggestions;
+      const scores = result.scores;
+
+      // Set stress level
+      const levelBox = document.getElementById("stressLevelBox");
+      const levelText = document.getElementById("stressLevelText");
+      levelText.innerText = level;
+      levelBox.classList.add(level.toLowerCase());
+
+      // Add suggestions
+      const suggestionList = document.getElementById("suggestionList");
+      suggestions.forEach(s => {
+        const li = document.createElement("li");
+        li.textContent = s;
+        suggestionList.appendChild(li);
+      });
+
+    if (scores) {
+      const ctx = document.getElementById('stressChart').getContext('2d');
+      const labels = Object.keys(scores).map(k => k.replace("_", " "));
+      const dataValues = Object.values(scores);
+
+      new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Your Stress Scores',
+            data: dataValues,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgb(54, 162, 235)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgb(54, 162, 235)'
+          }]
+        },
+        options: {
+          scales: {
+            r: {
+              suggestedMin: 0,
+              suggestedMax: 5,
+              ticks: {
+                stepSize: 1
+              },
+              pointLabels: {
+                font: {
+                  size: 14
+                }
+              }
+            }
+          }
+        }
+      });
+    } else {
+      console.log("⚠️ No scores found for chart.");
+    }
+  }
+  </script>
+</body>
+</html>
