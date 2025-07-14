@@ -1,11 +1,13 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
+from dotenv import load_dotenv
 import os
+load_dotenv()
 
-# A4F API credentials
-a4f_api_key = "ddc-a4f-0293b06a91da4c2abf9fe22161cf2652"
-a4f_base_url = "https://api.a4f.co/v1"
+# API credentials
+a4f_api_key = os.getenv("OPENAI_API_KEY")
+a4f_base_url = os.getenv("OPENAI_BASE_URL")
 
 # Initialize client
 client = OpenAI(
