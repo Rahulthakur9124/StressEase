@@ -50,7 +50,7 @@ if st.button("🧠 Predict Stress & Get Suggestions"):
 
         # Call A4F/OpenAI API
         response = client.chat.completions.create(
-            model="provider-3/gpt-4",
+            model="provider-5/gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt}
@@ -67,3 +67,4 @@ if st.button("🧠 Predict Stress & Get Suggestions"):
         st.subheader("💡 Personalized Suggestions:")
         for s in suggestions:
             st.markdown(f"- {s}")
+
